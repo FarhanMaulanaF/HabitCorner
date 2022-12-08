@@ -1,0 +1,135 @@
+-- Table: public.tb_habit
+
+-- DROP TABLE IF EXISTS public.tb_habit;
+
+CREATE TABLE IF NOT EXISTS public.tb_habit
+(
+    habitid character varying COLLATE pg_catalog."default" NOT NULL DEFAULT nextval('tb_habit_habitid_seq'::regclass),
+    habitname character varying COLLATE pg_catalog."default",
+    habitdate character varying COLLATE pg_catalog."default" DEFAULT CURRENT_DATE,
+    habitstatus boolean NOT NULL DEFAULT false,
+    CONSTRAINT tb_habit_pkey PRIMARY KEY (habitid)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.tb_habit
+    OWNER to postgres;
+
+
+
+-- FUNCTION: public.st_selecthabit()
+
+-- DROP FUNCTION IF EXISTS public.st_selecthabit();
+
+CREATE OR REPLACE FUNCTION public.st_selecthabit(
+	)
+    RETURNS TABLE(_habitid character varying, _habitname character varying, _habitdate character varying, _habitstatus boolean) 
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+begin
+    return query
+    select habitId, habitName, habitDate, habitStatus from tb_habit;
+end
+$BODY$;
+
+ALTER FUNCTION public.st_selecthabit()
+    OWNER TO postgres;
+
+
+
+-- FUNCTION: public.st_inserthabit(character varying, character varying)
+
+-- DROP FUNCTION IF EXISTS public.st_inserthabit(character varying, character varying);
+
+CREATE OR REPLACE FUNCTION public.st_inserthabit(
+	_habitname character varying,
+	_habitdate character varying)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+AS $BODY$
+begin
+    insert into public.tb_habit(
+        habitName,
+        habitDate
+    )
+    values(
+        _habitName,
+        _habitDate
+    );
+    if found then
+        return 1;
+    else
+        return 0;
+    end if;
+end
+$BODY$;
+
+ALTER FUNCTION public.st_inserthabit(character varying, character varying)
+    OWNER TO postgres;
+
+
+
+-- FUNCTION: public.st_updatehabit(character varying, character varying, character varying, boolean)
+
+-- DROP FUNCTION IF EXISTS public.st_updatehabit(character varying, character varying, character varying, boolean);
+
+CREATE OR REPLACE FUNCTION public.st_updatehabit(
+	_habitid character varying,
+	_habitname character varying,
+	_habitdate character varying,
+	_habitstatus boolean)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+AS $BODY$
+begin
+    update tb_habit set
+        habitName = _habitName,
+        habitDate = _habitDate,
+        habitStatus = _habitStatus
+    where habitId = _habitId;
+    if found then
+        return 1;
+    else
+        return 0;
+    end if;
+end
+$BODY$;
+
+ALTER FUNCTION public.st_updatehabit(character varying, character varying, character varying, boolean)
+    OWNER TO postgres;
+
+
+
+-- FUNCTION: public.st_deletehabit(character varying)
+
+-- DROP FUNCTION IF EXISTS public.st_deletehabit(character varying);
+
+CREATE OR REPLACE FUNCTION public.st_deletehabit(
+	_habitid character varying)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+AS $BODY$
+begin
+    delete from public.tb_habit
+    where habitId = _habitId;
+    if found then
+        return 1;
+    else
+        return 0;
+    end if;
+end
+$BODY$;
+
+ALTER FUNCTION public.st_deletehabit(character varying)
+    OWNER TO postgres;
